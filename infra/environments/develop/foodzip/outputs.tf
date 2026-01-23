@@ -26,3 +26,7 @@ output "ecs_frontend_sg_id" {
 output "rds_sg_id" {
   value = module.security_groups.rds_sg_id
 }
+
+output "acm_certificate_arn" {
+  value = module.acm.certificate_arn
+}

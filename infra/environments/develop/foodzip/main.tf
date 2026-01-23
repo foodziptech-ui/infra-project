@@ -44,4 +44,25 @@ module "security_groups" {
   tags = local.common_tags
 }
 
+### route53 zone data source ###
+module "route53_zone" {
+  source      = "../../../modules/route53-zone"
+  domain_name = "foodzip.com.br"
+  tags        = local.common_tags
+}
+
+output "route53_name_servers" {
+  value = module.route53_zone.name_servers
+}
+
+module "acm" {
+  source = "../../../modules/acm"
+
+  domain_name    = "foodzip.com.br"
+  hosted_zone_id = module.route53_zone.zone_id
+
+  subject_alternative_names = ["www.foodzip.com.br"]
+
+  tags = local.common_tags
+}
 
