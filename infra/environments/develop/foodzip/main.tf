@@ -66,3 +66,54 @@ module "acm" {
   tags = local.common_tags
 }
 
+
+module "rds" {
+  source = "../../../modules/rds"
+
+  name = "${local.project}-rds"
+
+  vpc_id        = module.networking.vpc_id
+  db_subnet_ids = module.networking.private_db_subnet_ids
+
+  instance_class  = "db.t3.micro" # free-tier
+  engine_version  = "15.8"
+  db_name         = "apifoodzip"
+  master_username = "postgres"
+
+  # TEMP: se precisar abrir pra testar
+  # allowed_cidrs = ["SEU_IP_PUBLICO/32"]
+
+  tags = local.common_tags
+}
+
+module "bastion" {
+  source = "../../../modules/ec2/bastion"
+
+  name = "${local.project}-ec2-bastion-rds-develop"
+
+  vpc_id    = module.networking.vpc_id
+  subnet_id = module.networking.public_subnet_ids[0]
+
+  instance_type = "t3.micro" # free-tier EC2
+  ssh_key_name  = var.ssh_key_name
+
+  allowed_ssh_cidrs = [var.my_ip_cidr]
+
+  tags = local.common_tags
+}
+
+module "sg_rules" {
+  source = "../../../modules/sg-rules"
+
+  rules = [
+    {
+      type                     = "ingress"
+      description              = "Postgres from bastion"
+      from_port                = 5432
+      to_port                  = 5432
+      protocol                 = "tcp"
+      security_group_id        = module.rds.security_group_id
+      source_security_group_id = module.bastion.security_group_id
+    }
+  ]
+}

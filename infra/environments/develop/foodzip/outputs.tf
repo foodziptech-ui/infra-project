@@ -30,3 +30,20 @@ output "rds_sg_id" {
 output "acm_certificate_arn" {
   value = module.acm.certificate_arn
 }
+
+
+output "rds_endpoint" {
+  value = module.rds.endpoint
+}
+
+output "rds_secret_arn" {
+  value = module.rds.master_user_secret_arn
+}
+
+output "bastion_public_ip" {
+  value = module.bastion.public_ip
+}
+
+output "bastion_sg_id" {
+  value = module.bastion.security_group_id
+}
